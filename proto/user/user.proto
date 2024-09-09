@@ -2,12 +2,19 @@ syntax = "proto3";
 
 package userproto;
 
-service UserService {
-    rpc getUsers(getBooksRequest) returns (getUsersResponse) {}
+service UserGRPCService {
+    rpc getAllUser(getBooksRequest) returns (getUsersResponse) {}
+    rpc getUserById(userId) returns (getUsersByIdResponse) {}
 }
 
 message getBooksRequest{
 
+}
+
+message getUsersByIdResponse {
+    int32 responseCode = 1;
+    User users = 2;
+    
 }
 
 message getUsersResponse {
@@ -20,4 +27,8 @@ message User {
     string lastName = 3;
     string email = 4;
     string username = 5;
+}
+
+message userId {
+  int32 id = 1;
 }

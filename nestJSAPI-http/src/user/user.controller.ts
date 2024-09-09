@@ -6,7 +6,9 @@ import {
   UseGuards,
   Post,
   Param,
+  Inject,
   Res,
+  OnModuleInit
 } from '@nestjs/common';
 import { User } from '@prisma/client';
 // import { AuthGuard } from '@nestjs/passport';
@@ -15,11 +17,21 @@ import { GetUser } from '../auth/decorator';
 import { JwtGuard } from '../auth/guard';
 import { EditUserDto, CreateUserDto } from './dto';
 import { UserService } from './user.service';
+import { ClientGrpc } from '@nestjs/microservices';
+import { Observable } from 'rxjs';
+
+interface UserGRPCService {
+  getAllUser({}): Observable<any>;
+  getUserById({}): Observable<any>;
+}
 
 @Controller('users')
-export class UserController {
-  constructor(private userService: UserService) {}
-
+export class UserController implements OnModuleInit {
+  private userGRPCService: UserGRPCService;
+  constructor(@Inject('USERPROTO_PACKAGE') private client: ClientGrpc, private userService: UserService) {}
+  onModuleInit() {
+    this.userGRPCService = this.client.getService<UserGRPCService>('UserGRPCService');
+  }
   // @UseGuards(AuthGuard('jwt')) // This is inbuilt guard given by passport
   @UseGuards(JwtGuard) // This is the custom guard
   @Get('me')
@@ -34,8 +46,11 @@ export class UserController {
   }
 
   @Get()
-  findAll() {
-    return this.userService.findAllUser();
+  // findAll() {
+  //   return this.userService.findAllUser();
+  // }
+  async getProtoUsers() {
+    return this.userGRPCService.getAllUser(null);
   }
 
   @Get('import-xls')
@@ -45,8 +60,8 @@ export class UserController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.userService.viewUser(+id);
+  async findOne(@Param('id') id: string) {
+    return this.userGRPCService.getUserById(new Object({id:id}));
   }
 
   // @UseGuards(JwtGuard)

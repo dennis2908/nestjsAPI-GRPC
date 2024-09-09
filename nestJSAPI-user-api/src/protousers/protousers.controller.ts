@@ -1,4 +1,4 @@
-import { Controller } from '@nestjs/common';
+import { Controller,Param } from '@nestjs/common';
 import { GrpcMethod } from '@nestjs/microservices';
 import { UserService } from '../user/user.service';
 
@@ -6,11 +6,22 @@ import { UserService } from '../user/user.service';
 export class ProtousersController {
   constructor(private userService: UserService) {}
   
-  @GrpcMethod('UserService', 'getUsers')
+  @GrpcMethod('UserGRPCService', 'getAllUser')
   async getUsers() {
     let res = await this.userService.findAllUser()
      return {
       users: res,
+    };
+  }
+
+  @GrpcMethod('UserGRPCService', 'getUserById')
+  async findOne(userId:{id: string}) {
+   
+    let res = await this.userService.viewUser(parseInt(userId.id));
+     console.log(121221,{responseCode : 200, users : res})
+     return {
+      responseCode : 200,
+      users : res
     };
   }
 }
