@@ -1,8 +1,6 @@
 syntax = "proto3";
 
-import "google/protobuf/any.proto";
-
-package userproto;
+package userprotoclient;
 
 service UserGRPCService {
     rpc getAllUser(getUserRequest) returns (getUsersResponse) {}
@@ -10,9 +8,8 @@ service UserGRPCService {
 }
 
 service UserGRPCService2 {
-    rpc importUser(getUserRequest) returns (getReturnRequest) {}
-    rpc createUser(UserPost) returns (getReturnRequest) {}
-    rpc getFileExport(getUserRequest) returns (returnFileExport) {}
+    rpc importXl(getUserRequest) returns (getReturnRequest) {}
+    rpc importXl2(getUserRequest) returns (getReturnRequest) {}
 }
 
 message getUserRequest{
@@ -20,13 +17,8 @@ message getUserRequest{
 }
 
 message getReturnRequest{
-   string response = 1;
-}
 
-message returnFileExport{
-   string filename = 1;
 }
-
 
 message getUsersByIdResponse {
     int32 responseCode = 1;
@@ -44,13 +36,6 @@ message User {
     string lastName = 3;
     string email = 4;
     string username = 5;
-}
-
-message UserPost {
-    string firstName = 1;
-    string lastName = 2;
-    string email = 3;
-    string username = 4;
 }
 
 message userId {

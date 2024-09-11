@@ -18,19 +18,31 @@ import { JwtGuard } from '../auth/guard';
 import { EditUserDto, CreateUserDto } from './dto';
 import { UserService } from './user.service';
 import { ClientGrpc } from '@nestjs/microservices';
-import { Observable } from 'rxjs';
+import { Observable,lastValueFrom } from 'rxjs';
 
 interface UserGRPCService {
   getAllUser({}): Observable<any>;
   getUserById({}): Observable<any>;
+
+}
+interface fileExport{
+  filename : string,
+  buffer : string
+}
+interface UserGRPCService2 {
+  importUser({}): Promise<any>;
+  createUser({}): Promise<any>;
+  getFileExport({}): Observable<fileExport>;
 }
 
 @Controller('users')
 export class UserController implements OnModuleInit {
   private userGRPCService: UserGRPCService;
-  constructor(@Inject('USERPROTO_PACKAGE') private client: ClientGrpc, private userService: UserService) {}
+  private userGRPCService2: UserGRPCService2;
+  constructor(@Inject('USERPROTO_PACKAGE') private client: ClientGrpc,@Inject('USERPROTOCLIENT_PACKAGE') private client2: ClientGrpc, private userService: UserService) {}
   onModuleInit() {
     this.userGRPCService = this.client.getService<UserGRPCService>('UserGRPCService');
+    this.userGRPCService2 = this.client2.getService<UserGRPCService2>('UserGRPCService2');
   }
   // @UseGuards(AuthGuard('jwt')) // This is inbuilt guard given by passport
   @UseGuards(JwtGuard) // This is the custom guard
@@ -54,9 +66,23 @@ export class UserController implements OnModuleInit {
   }
 
   @Get('import-xls')
-  async importXLS(@Res() res: Response) {
-    await this.userService.importXLS();
-    res.send('successfully import data');
+  async importUser() {
+    return await this.userGRPCService2.importUser(null)
+  }
+
+  @Get('export-xls')
+  async exportUser(@Res() res: Promise<Response>) {
+    const buffer = await this.userService.exportXLS();
+    const fileExport:fileExport = await lastValueFrom(this.userGRPCService2.getFileExport(null));
+   
+    (await res).header(
+      'Content-Disposition',
+      'attachment; filename=user-' + fileExport.filename + '.xlsx',
+    );
+    (await res).type(
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    );
+    (await res).send(buffer);
   }
 
   @Get(':id')
@@ -73,20 +99,7 @@ export class UserController implements OnModuleInit {
   // @UseGuards(JwtGuard)
   @Post()
   async create(@Body() createUserDto: CreateUserDto) {
-    return this.userService.createUser(createUserDto);
+    return this.userGRPCService2.createUser(createUserDto);
   }
 
-  @Get('xls')
-  async exportXLS(@Res() res: Response) {
-    const buffer = await this.userService.exportXLS();
-    const filename = await this.userService.nowDate();
-    res.header(
-      'Content-Disposition',
-      'attachment; filename=user-' + filename + '.xlsx',
-    );
-    res.type(
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    );
-    res.send(buffer);
-  }
 }

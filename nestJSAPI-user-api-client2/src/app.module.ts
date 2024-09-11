@@ -12,7 +12,6 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { LogSchema } from 'src/mongo/mongo.schema';
 import { ProtousersModule } from 'src/protousers/protousers.module';
 
-
 require('dotenv').config({ path: '.env' });
 
 @Module({
@@ -26,7 +25,6 @@ require('dotenv').config({ path: '.env' });
       type: 'postgres',
       url: process.env.DATABASE_URL,
       entities: [UserEntity],
-      synchronize : true
     }),
     AuthModule,
     UserModule,

@@ -2,6 +2,8 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { Transport } from '@nestjs/microservices/enums/transport.enum';
+import { MicroserviceOptions } from '@nestjs/microservices';
+import { join } from 'path';
 import { ClusterService } from './cluster/cluster.service'
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -26,7 +28,20 @@ async function bootstrap() {
       whitelist: true,
     }),
   );
+  const appc = await NestFactory.createMicroservice<MicroserviceOptions>(
+    AppModule,
+    {
+      transport: Transport.GRPC,
+      options: {
+        package: 'userproto',
+        protoPath: join(__dirname, '../../proto/user/user.proto'),
+        url: '0.0.0.0:50052',
+      },
+    },
+  );
+  await appc.listen();
   await appx.listen();
-  await app.listen(3333);
+  await app.listen(3334);
+ 
 }
 ClusterService.clusterize(bootstrap);
