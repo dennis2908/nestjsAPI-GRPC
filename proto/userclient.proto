@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package userprotoclient;
+
+service UserGRPCService {
+    rpc getAllUser(getUserRequest) returns (getUsersResponse) {}
+    rpc getUserById(userId) returns (getUsersByIdResponse) {}
+}
+
+service UserGRPCService2 {
+    rpc importXl(getUserRequest) returns (getReturnRequest) {}
+    rpc importXl2(getUserRequest) returns (getReturnRequest) {}
+}
+
+message getUserRequest{
+
+}
+
+message getReturnRequest{
+
+}
+
+message getUsersByIdResponse {
+    int32 responseCode = 1;
+    User users = 2;
+    
+}
+
+message getUsersResponse {
+    repeated User users = 1;
+}
+
+message User {
+    int32 id = 1;
+    string firstName = 2;
+    string lastName = 3;
+    string email = 4;
+    string username = 5;
+}
+
+message userId {
+  int32 id = 1;
+}

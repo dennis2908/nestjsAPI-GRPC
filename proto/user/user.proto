@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+import "google/protobuf/any.proto";
+
+package userproto;
+
+service UserGRPCService {
+    rpc getAllUser(getUserRequest) returns (getUsersResponse) {}
+    rpc getUserById(userId) returns (getUsersByIdResponse) {}
+}
+
+service UserGRPCService2 {
+    rpc importUser(getUserRequest) returns (getReturnRequest) {}
+    rpc createUser(UserPost) returns (getReturnRequest) {}
+    rpc getFileExport(getUserRequest) returns (returnFileExport) {}
+}
+
+message getUserRequest{
+
+}
+
+message getReturnRequest{
+   string response = 1;
+}
+
+message returnFileExport{
+   string filename = 1;
+}
+
+
+message getUsersByIdResponse {
+    int32 responseCode = 1;
+    User users = 2;
+    
+}
+
+message getUsersResponse {
+    repeated User users = 1;
+}
+
+message User {
+    int32 id = 1;
+    string firstName = 2;
+    string lastName = 3;
+    string email = 4;
+    string username = 5;
+}
+
+message UserPost {
+    string firstName = 1;
+    string lastName = 2;
+    string email = 3;
+    string username = 4;
+}
+
+message userId {
+  int32 id = 1;
+}
